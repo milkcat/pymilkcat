@@ -1,3 +1,29 @@
+//
+// The MIT License (MIT)
+//
+// Copyright 2013-2014 The MilkCat Project Developers
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+// _pymilkcat.cc --- Created at 2014-02-19
+//
+
 #include <Python.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -11,11 +37,10 @@ typedef struct {
 } ModelObject;
 
 static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds) {
-  int argc = PyTuple_GET_SIZE(args);
   char *model_path = NULL;
   
   if (!PyArg_ParseTuple(args, "z", &model_path)) 
-    return NULL;
+    return -1;
   self->model_ = milkcat_model_new(model_path);
   return 0;
 }
@@ -283,11 +308,13 @@ static PyTypeObject MilkCatType = {
   MilkCat_new,                    /* tp_new */
 };
 
-// ----------------------------------- Python Module -----------------------------------
+// -------------------------------- Python Module ------------------------------
+
+#if PY_MAJOR_VERSION == 3
 
 static PyModuleDef PyMilkCat_module = {
    PyModuleDef_HEAD_INIT,
-   "pymilkcat",  /* name of module */
+   "_pymilkcat",  /* name of module */
    NULL,         /* module documentation, may be NULL */
    -1,           /* size of per-interpreter state of the module,
                     or -1 if the module keeps state in global variables. */
@@ -295,7 +322,7 @@ static PyModuleDef PyMilkCat_module = {
 };
 
 PyMODINIT_FUNC
-PyInit_pymilkcat(void) {
+PyInit__pymilkcat(void) {
    PyObject* module;
 
    if (PyType_Ready(&ModelType) < 0)
@@ -315,3 +342,31 @@ PyInit_pymilkcat(void) {
 
    return module;
 }
+
+#elif PY_MAJOR_VERSION == 2
+
+static PyMethodDef _pymilkcat_methods[] = {
+    {NULL}  /* Sentinel */
+};
+
+PyMODINIT_FUNC
+init_pymilkcat(void) {
+   PyObject* module;
+
+   if (PyType_Ready(&ModelType) < 0)
+      return;
+
+   if (PyType_Ready(&MilkCatType) < 0)
+      return;
+
+   module = Py_InitModule("_pymilkcat", _pymilkcat_methods);
+   if (module == NULL)
+      return;
+   
+   Py_INCREF(&ModelType);
+   PyModule_AddObject(module, "Model", (PyObject *)&ModelType);
+   Py_INCREF(&MilkCatType);
+   PyModule_AddObject(module, "MilkCat", (PyObject *)&MilkCatType);
+}
+
+#endif  // PY_MAJOR_VERSION == 3

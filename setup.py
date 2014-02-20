@@ -1,8 +1,11 @@
 from distutils.core import setup, Extension
 
-pymilkcat = Extension('pymilkcat', sources = ['pymilkcat.cc'], libraries = ['milkcat'])
+_pymilkcat = Extension('_pymilkcat', 
+	                  sources = ['_pymilkcat.cc'], 
+	                  libraries = ['milkcat'])
 
-setup (name = 'PackageName',
+setup (name = 'pymilkcat',
        version = '1.0',
-       description = 'This is a demo package',
-       ext_modules = [pymilkcat])
+       py_modules = ['pymilkcat'],
+       description = 'Python interface for MilkCat - A Chinese morphological analyzer',
+       ext_modules = [_pymilkcat])
