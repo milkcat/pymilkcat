@@ -38,17 +38,30 @@ import _pymilkcat
 _seg_analyzer = None
 _pos_tag_analyzer = None
 
+TOKENIZER_NORMAL = 0x00000001
 
-DEFAULT_ANALYZER = 0
-CRF_SEGMENTER = 1
-CRF_ANALYZER = 2
-DEFAULT_SEGMENTER = 3
-BIGRAM_SEGMENTER = 4
+SEGMENTER_CRF = 0x00000010
+SEGMENTER_UNIGRAM = 0x00000020
+SEGMENTER_BIGRAM = 0x00000030
+SEGMENTER_MIXED = 0x00000040
+
+POSTAGGER_HMM = 0x00001000
+POSTAGGER_CRF = 0x00002000
+POSTAGGER_MIXED = 0x00003000
+
+DEFAULT_ANALYZER = TOKENIZER_NORMAL | SEGMENTER_MIXED | POSTAGGER_MIXED
+DEFAULT_SEGMENTER = TOKENIZER_NORMAL | SEGMENTER_MIXED
+
+CRF_SEGMENTER = TOKENIZER_NORMAL | SEGMENTER_CRF
+CRF_ANALYZER = TOKENIZER_NORMAL | SEGMENTER_CRF | POSTAGGER_CRF
+
+BIGRAM_SEGMENTER = TOKENIZER_NORMAL | SEGMENTER_BIGRAM
+UNIGRAM_SEGMENTER = TOKENIZER_NORMAL | SEGMENTER_BIGRAM
+
 
 def seg(text):
     '''
-    Segment the text into a list of Chinese words. The first time call this
-    function will be slower since it needs to load the model from disk
+    Segment the text into an array of Chinese words. 
     '''
 
     global _seg_analyzer
@@ -60,8 +73,7 @@ def seg(text):
 def pos_tag(text):
     '''
     Segment and get the part-of-speech tag of each word from text, return a list
-    of (word, part_of_speech_tag) tuples. The first time call this function will
-    be slower since it needs to load the model from disk
+    of (word, part_of_speech_tag) tuples.
     '''
 
     global _pos_tag_analyzer
@@ -93,6 +105,7 @@ class MilkCat:
                                  tagger
             DEFAULT_SEGMENTER  - The default word segmenter
             BIGRAM_SEGMENTER   - The bigram model based word segmenter
+            UNIGRAM_SEGMENTER  - The unigram model based word segmenter
         userdict_path: The path of user dictionary for word segmenter
         model_dir: The path of MilkCat model directory, set None to use the 
                    default model
