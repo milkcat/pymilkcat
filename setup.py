@@ -2,7 +2,8 @@ from distutils.core import setup, Extension
 
 _pymilkcat = Extension('_pymilkcat', 
 	                  sources = ['_pymilkcat.cc'], 
-	                  libraries = ['milkcat'])
+	                  libraries = ['milkcat'],
+                    extra_compile_args = ['-g'])
 
 setup (name = 'pymilkcat',
        version = '1.0',
