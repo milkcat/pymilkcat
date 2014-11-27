@@ -50,7 +50,7 @@ class Parser:
 
     def __init__(self, 
                  segmenter = MIXED_SEGMENTER, 
-                 tagger = MIXED_POSTAGGER,
+                 tagger = CRF_POSTAGGER,
                  userdict_path = None, 
                  model_dir = None):
         if model_dir != None and model_dir[-1] != '/':

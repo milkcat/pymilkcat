@@ -168,9 +168,8 @@ static int Parser_init(ParserObject *self, PyObject *args, PyObject *kwds) {
       options.UseMixedPOSTagger();
       break;
   }
-  options.SetModel(model_object->model_);
 
-  self->parser_ = milkcat::Parser::New(options);
+  self->parser_ = milkcat::Parser::New(options, model_object->model_);
   self->it_ = new milkcat::Parser::Iterator();
   self->model_object_ = model_object;
   Py_INCREF(self->model_object_);
