@@ -1,12 +1,11 @@
 from distutils.core import setup, Extension
 
-_pymilkcat = Extension('_pymilkcat', 
-	                  sources = ['_pymilkcat.cc'], 
-	                  libraries = ['milkcat'],
-                    extra_compile_args = ['-g'])
+milkcat_capi = Extension('_milkcat_capi',
+	                       sources = ['milkcat_capi_wrap.c'],
+	                       libraries = ['milkcat'])
 
 setup (name = 'pymilkcat',
        version = '1.0',
-       py_modules = ['pymilkcat'],
-       description = 'Python interface for MilkCat - A Chinese morphological analyzer',
-       ext_modules = [_pymilkcat])
+       py_modules = ['pymilkcat', 'milkcat_capi'],
+       description = 'Python interface for MilkCat - A Chinese NLP toolkit',
+       ext_modules = [milkcat_capi])

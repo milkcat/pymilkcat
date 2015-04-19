@@ -25,47 +25,69 @@
 # pymilkcat.py --- Created at 2014-02-20
 #
 
-import _pymilkcat
+import milkcat_capi
+import sys
 
+class ParserOptions:
+    ''' The options for Parser '''
 
-CRF_SEGMENTER = 1
-UNIGRAM_SEGMENTER = 2
-BIGRAM_SEGMENTER = 3
-MIXED_SEGMENTER = 4
+    def __init__(self):
+        self._options = milkcat_capi.milkcat_parseroptions_t()
+        milkcat_capi.milkcat_parseroptions_init(self._options)
 
-HMM_POSTAGGER = 1
-CRF_POSTAGGER = 2
-MIXED_POSTAGGER = 3
-NO_POSTAGGER = 0
+    def UseMixedSegmenter(self):
+        self._options.word_segmenter = milkcat_capi.MC_SEGMENTER_MIXED
+    def UseCRFSegmenter(self):
+        self._options.word_segmenter = milkcat_capi.MC_SEGMENTER_CRF
+    def UseBigramSegmenter(self):
+        self._options.word_segmenter = milkcat_capi.MC_SEGMENTER_BIGRAM
+
+    def UseMixedPOSTagger(self):
+        self._options.part_of_speech_tagger = milkcat_capi.MC_POSTAGGER_MIXED
+    def UseHMMPOSTagger(self):
+        self._options.part_of_speech_tagger = milkcat_capi.MC_POSTAGGER_HMM
+    def UseCRFPOSTagger(self):
+        self._options.part_of_speech_tagger = milkcat_capi.MC_POSTAGGER_CRF
+    def NoPOSTagger(self):
+        self._options.part_of_speech_tagger = milkcat_capi.MC_POSTAGGER_NONE
+
+    def UseYamadaParser(self):
+        self._options.dependency_parser = milkcat_capi.MC_DEPPARSER_YAMADA
+    def UseBeamYamadaParser(self):
+        self._options.dependency_parser = milkcat_capi.MC_DEPPARSER_BEAMYAMADA
+    def NoDependencyParser(self):
+        self._options.dependency_parser = milkcat_capi.MC_DEPPARSER_NONE
+
+    def SetUserDictionary(self, userdict):
+        self._options.user_dictionary_path = userdict
+    def SetModelPath(self, model_path):
+        self._options.model_path = model_path
+
+class Item:
+    def __init__(self, it):
+        self.word = it.word
+        self.part_of_speech_tag = it.part_of_speech_tag
+        self.head = it.head
+        self.dependency_label = it.dependency_label
+        self.is_begin_of_sentence = it.is_begin_of_sentence
 
 class Parser:
-    '''
-    Chinese word segmenter, part-of-speech tagger and dependency parser.
+    def __init__(self, options = ParserOptions()):
+        self._parser = milkcat_capi.milkcat_parser_new(options._options)
+        if self._parser == None:
+            raise Exception(milkcat_capi.milkcat_last_error())
+        self._iterator = milkcat_capi.milkcat_parseriterator_new()
 
-    Example:
-        import pymilkcat
-        parser = pymilkcat.Parser()
-        parser.pos_tag('今天天气不错')
-    '''
+    def Predict(self, text):
+        milkcat_capi.milkcat_parser_predict(
+            self._parser,
+            self._iterator,
+            text)
+        result = []
+        while milkcat_capi.milkcat_parseriterator_next(self._iterator):
+            result.append(Item(self._iterator))
+        return result
 
-    def __init__(self, 
-                 segmenter = MIXED_SEGMENTER, 
-                 tagger = CRF_POSTAGGER,
-                 userdict_path = None, 
-                 model_dir = None):
-        if model_dir != None and model_dir[-1] != '/':
-            model_dir += '/'
-        self._model = _pymilkcat.Model(model_dir)
-        if userdict_path != None:
-            r = self._model.set_userdict(userdict_path)
-            if r == False:
-                raise Exception('Unable to load user dictionary: ' + userdict_path)
-        self._parser = _pymilkcat.Parser(self._model, segmenter, tagger)
-
-    def seg(self, text):
-        return list(map(lambda x: x[0], self._parser.parse(text)))
-
-    def pos_tag(self, text):
-        return list(map(lambda x: (x[0], x[1]), self._parser.parse(text)))
-
-
+    def Break(self, text):
+        prediction = self.Predict(text)
+        return [item.word for item in prediction]
