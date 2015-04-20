@@ -34,6 +34,8 @@ sudo python3 setup.py install
 
 Python3例子
 
+分词\&词性标注
+
 ```python
 >>> import pymilkcat
 >>> parser = pymilkcat.Parser()
@@ -53,3 +55,32 @@ Python3例子
 ～/PU
 >>> 
 ```
+
+依存分析
+
+```python
+>>> import pymilkcat 
+>>> options = pymilkcat.ParserOptions()
+>>> options.UseBeamYamadaParser()
+>>> parser = pymilkcat.Parser(options)
+>>> for item in parser.Predict('我的猫喜欢喝牛奶。'):
+...     print('{}\t{}\t{}\t{}'.format(
+...         item.word,
+...         item.part_of_speech_tag,
+...         item.head,
+...         item.dependency_label))
+... 
+我 PN  3 NMOD
+的 DEG 1 DEG
+猫 NN  4 SBJ
+喜欢  VV  0 ROOT
+喝 VV  4 OBJ
+牛奶  NN  5 OBJ
+。 PU  4 VMOD
+>>> 
+```
+
+API
+---
+
+pymilkcat使用与MilkCat/C++一致的API, 详情请参照pymilkcat.py以及[MilkCat/C++ API](https://github.com/milkcat/MilkCat)
