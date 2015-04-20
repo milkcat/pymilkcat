@@ -70,13 +70,13 @@ Python3例子
 ...         item.head,
 ...         item.dependency_label))
 ... 
-我	PN	3	NMOD
-的	DEG	1	DEG
-猫	NN	4	SBJ
-喜欢	VV	0	ROOT
-喝	VV	4	OBJ
-牛奶	NN	5	OBJ
-。	PU	4	VMOD
+我    PN   3   NMOD
+的    DEG  1   DEG
+猫    NN   4   SBJ
+喜欢  VV   0   ROOT
+喝    VV   4   OBJ
+牛奶  NN   5   OBJ
+。    PU   4   VMOD
 >>> 
 ```
 
